@@ -1,57 +1,76 @@
 <template>
-  <div :class="isDarkMode ? 'dark' : 'light'">
-    <Headline 
-    :theme="isDarkMode ? 'dark' : 'light'"
-    @toggleTheme="toggleDarkMode" />
+  <div :class="theme">
+    <Headline :theme="theme" @toggleTheme="toggleDarkMode" />
 
     <section class="content container" style="margin-top: 90px">
-      <p class="text-center">To create your video, just enter the URL of the webpage you'd like a personalized 30-second video for, and we'll take care of the rest</p>
+      <p class="text-center">
+        To create your video, just enter the URL of the webpage you'd like a
+        personalized 30-second video for, and we'll take care of the rest
+      </p>
 
       <div class="d-flex align-items-end w-100">
-      <Input
-        class='flex-fill'
-        id="input-url"
-        v-model="url"
-        placeholder="Find a webpage URL"
-        :disabled="isDisabled"
-        isSearchable
-        label="URL"
-      />
-
-      <Button
-        class="ms-2"
-        type="primary"
-        size="md"
-        label="Generate"
-       >
-        <template #start>
-          <img class="me-2" src="./assets/ai.svg" alt="ai-icon">
-        </template>
-       </Button>
+        <Input
+          class="flex-fill"
+          id="input-url"
+          v-model="url"
+          placeholder="Find a webpage URL"
+          :disabled="isLoading"
+          isSearchable
+          label="URL"
+        />
+        <Button 
+          class="ms-2"
+          type="primary" 
+          size="md"
+          label="Generate"
+          :disabled="isLoading"
+          @click="submitUrl">
+          <template #start>
+            <img class="me-2" src="./assets/ai.svg" alt="ai-icon" />
+          </template>
+        </Button>
       </div>
 
       <div class="d-flex w-100 mt-4 justify-content-center">
         <Skeleton />
+      </div>
+      <div class="d-flex w-100 mt-4 justify-content-center">
+        <VideoPlayer 
+          src="https://files.vidstack.io/sprite-fight/720p.mp4"
+          poster="https://files.vidstack.io/sprite-fight/poster.webp"
+        />
+      </div>
+
+      <div class="mt-4">
+        <MarkdownContent :mode="theme" :content="markdownContent" />
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-
-import { ref, onMounted } from 'vue';
-import Headline from './components/Headline.vue'; 
+import { ref, onMounted, computed } from 'vue';
+import Headline from './components/Headline.vue';
 import Input from './components/atoms/Input.vue';
 import Button from './components/atoms/Button.vue';
 import Skeleton from './components/atoms/Skeleton.vue';
+import MarkdownContent from './components/MarkdownContent.vue';
+import VideoPlayer from './components/VideoPlayer.vue';
 
+const baseApiUrl = 'https://limitless-caverns-66680-20d525e8d29f.herokuapp.com/api/v1';
 const isDarkMode = ref(false);
 const url = ref('');
-const isDisabled = ref(false);
+const isLoading = ref(false);
+const markdownContent = ref(
+  `## Markdown Basic Syntax I just love **bold text**.`
+);
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
-  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
+  document.documentElement.setAttribute(
+    'data-theme',
+    isDarkMode.value ? 'dark' : 'light'
+  );
   localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light');
 };
 
@@ -63,9 +82,32 @@ onMounted(() => {
   }
 });
 
+const theme = computed(() => (isDarkMode.value ? 'dark' : 'light'));
+
+const submitUrl = async () => {
+  isLoading.value = true;
+  try {
+    const request = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: url.value }),
+    };
+
+    const response = await fetch(`${baseApiUrl}/site`, request);
+    const data = await response.json();
+    console.log(data);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
+}
 </script>
 
-<style lang='scss'>
+<style lang="scss">
 /* Definir estilos para ambos modos usando CSS variables */
 :root {
   --bg-color: #fbfbfb;
@@ -83,7 +125,7 @@ onMounted(() => {
   --skeleton-bg: #e0e0e0;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --bg-color: #292c35;
   --text-color: #ffffff;
 
@@ -99,10 +141,8 @@ onMounted(() => {
   --skeleton-bg: #3a3d47;
 }
 
-
-
 body {
-  font-family: "Poppins", Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
 }
@@ -131,7 +171,7 @@ footer {
   border-radius: 0.25rem;
   border: none;
 
-  &--ghost{
+  &--ghost {
     background-color: transparent;
     color: var(--text-color);
 
@@ -145,5 +185,4 @@ footer {
     height: 40px;
   }
 }
-
 </style>

@@ -20,6 +20,7 @@
         :class="{ 'ps-5': isSearchable }"
         :type="type === 'password' ? 'password' : undefined"
         class="fv-input__field form-control"
+        @input="handleInput"
       />
 
       <i
@@ -47,11 +48,18 @@ interface Props {
   label?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   disabled: false,
   type: 'anyCharacter',
   isSearchable: false,
 });
+
+const emit = defineEmits(['update:modelValue'])
+
+
+const handleInput = (event: any) => {
+  emit('update:modelValue', event?.target?.value)
+}
 </script>
 
 <style scoped lang="scss">
