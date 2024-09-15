@@ -25,7 +25,7 @@
 
       <i
         v-if="isSearchable"
-        class="bx bx-search icon-search position-absolute"
+        class="fv-input__search bx bx-search icon-search position-absolute"
       ></i>
     </div>
   </div>
@@ -98,6 +98,10 @@ const handleInput = (event: any) => {
         box-shadow: var(--cobre-input-focus-shadow);
       }
     }
+  }
+
+  &__search {
+    color: var(--text-color); 
   }
 
   .icon-search {

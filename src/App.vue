@@ -18,13 +18,14 @@
           isSearchable
           label="URL"
         />
-        <Button 
+        <Button
           class="ms-2"
-          type="primary" 
+          type="primary"
           size="md"
           label="Generate"
           :disabled="isLoading"
-          @click="submitUrl">
+          @click="submitUrl"
+        >
           <template #start>
             <img class="me-2" src="./assets/ai.svg" alt="ai-icon" />
           </template>
@@ -34,15 +35,34 @@
       <div v-if="isLoading" class="d-flex w-100 mt-4 justify-content-center">
         <Skeleton />
       </div>
-      <div v-else class="d-flex w-100 mt-4 justify-content-center">
-        <VideoPlayer 
+      <div v-else class="d-flex w-100 mt-5 justify-content-center">
+        <VideoPlayer
           :src="videoUrl"
           poster="https://hackaton-square.s3.amazonaws.com/logo.webp?AWSAccessKeyId=AKIAWOAVSILM3KXDPB37&Signature=2WptuYsK1i3cd%2F5XLz2spCky8Ng%3D&Expires=1726512465"
         />
       </div>
 
       <div class="mt-4">
-        <MarkdownContent :mode="theme" :content="markdownContent" />
+        <div v-if="audioText">
+          <h3>Video script</h3>
+          <MarkdownContent class="mt-2" :mode="theme" :content="audioText" />
+        </div>
+        <div class="mt-2" v-if="videoPromptText">
+          <h3>Prompts videos generation</h3>
+          <MarkdownContent class="mt-2" :mode="theme" :content="videoPromptText" />
+        </div>
+        <MarkdownContent
+          v-if="companyExplanationPitch"
+          :mode="theme"
+          :content="companyExplanationPitch"
+        />
+        <MarkdownContent
+          v-if="companyInsights"
+          class="mt-2"
+          :mode="theme"
+          :content="companyInsights"
+        />
+        
       </div>
     </section>
   </div>
@@ -58,14 +78,21 @@ import MarkdownContent from './components/MarkdownContent.vue';
 import VideoPlayer from './components/VideoPlayer.vue';
 import { VideoStatusResponse } from './mocks/getVideoStatus.mock';
 import { delay } from './utils/utils';
+import { PostResponseUrl } from './mocks/postUrl.mock';
 
-const baseApiUrl = 'https://limitless-caverns-66680-20d525e8d29f.herokuapp.com/api/v1';
+const baseApiUrl =
+  'https://limitless-caverns-66680-20d525e8d29f.herokuapp.com/api/v1';
 const isDarkMode = ref(false);
 const url = ref('');
 const isLoading = ref(false);
-const markdownContent = ref("");
-const videoId = ref("");
-const videoUrl = ref("https://hackaton-square.s3.amazonaws.com/video.mp4?AWSAccessKeyId=AKIAWOAVSILM3KXDPB37&Signature=TMDy4uVijeUcJOW6kgoeX9AL74U%3D&Expires=1726477667");
+const companyExplanationPitch = ref('');
+const companyInsights = ref('');
+const audioText = ref('');
+const videoPromptText = ref('');
+const videoId = ref('');
+const videoUrl = ref(
+  'https://hackaton-square.s3.amazonaws.com/video.mp4?AWSAccessKeyId=AKIAWOAVSILM3KXDPB37&Signature=TMDy4uVijeUcJOW6kgoeX9AL74U%3D&Expires=1726477667'
+);
 const videoResponse = ref<VideoStatusResponse>();
 
 const toggleDarkMode = () => {
@@ -87,31 +114,36 @@ onMounted(() => {
 
 const theme = computed(() => (isDarkMode.value ? 'dark' : 'light'));
 
-
 const handleLaunchRetry = async () => {
-  let retry = 0
-  const maxAttempts = 10000000000
+  let retry = 0;
+  const maxAttempts = 10000000000;
 
-  const completedStatus = ["COMPLETED"]
+  const completedStatus = ['COMPLETED'];
 
   while (
-    retry < maxAttempts
-    && !completedStatus.includes(videoResponse.value?.status ?? "")
+    retry < maxAttempts &&
+    !completedStatus.includes(videoResponse.value?.status ?? '')
   ) {
     const getVideoResponse = await fetch(`${baseApiUrl}/site/${videoId.value}`);
     videoResponse.value = await getVideoResponse.json();
-    videoUrl.value = videoResponse.value?.video_url ?? ""
-    retry++
+    videoUrl.value = videoResponse.value?.video_url ?? '';
+    retry++;
 
-    if (retry < maxAttempts && !completedStatus.includes(videoResponse.value?.status ?? "")) {
-      await delay(2000)
+    if (
+      retry < maxAttempts &&
+      !completedStatus.includes(videoResponse.value?.status ?? '')
+    ) {
+      await delay(2000);
     }
   }
-
-}
+};
 
 const submitUrl = async () => {
   isLoading.value = true;
+  companyExplanationPitch.value = '';
+  companyInsights.value = '';
+  audioText.value = '';
+
   try {
     const request = {
       method: 'POST',
@@ -122,18 +154,20 @@ const submitUrl = async () => {
     };
 
     const postResponse = await fetch(`${baseApiUrl}/site`, request);
-    const data = await postResponse.json();
-    markdownContent.value = data.content;
+    const data: PostResponseUrl = await postResponse.json();
+    companyExplanationPitch.value = data.companyExplanationPitch;
+    companyInsights.value = data.companyInsights;
+    audioText.value = data.audioText;
+    videoPromptText.value = data.videoPromptText;
     videoId.value = data.sc_id;
 
-    await handleLaunchRetry()
-
+    await handleLaunchRetry();
   } catch (error) {
     console.error(error);
   } finally {
     isLoading.value = false;
   }
-}
+};
 </script>
 
 <style lang="scss">
@@ -152,6 +186,7 @@ const submitUrl = async () => {
 
   //skeleton
   --skeleton-bg: #e0e0e0;
+  --skeleton-shadow: 0px 0px 22px 19px rgb(201 193 146);
 }
 
 [data-theme='dark'] {
@@ -168,6 +203,7 @@ const submitUrl = async () => {
 
   //skeleton
   --skeleton-bg: #3a3d47;
+  --skeleton-shadow: 0px 0px 22px 19px rgb(99 93 58);
 }
 
 body {

@@ -4,8 +4,29 @@ export interface PostUrlRequest {
     url: string;
 }
 
-export interface PostUrlResponse {
-    sc_id: string;
+export interface PostResponseUrl {
+    sc_id:                   string;
+    content:                 string;
+    companyInsights:         string;
+    companyExplanationPitch: string;
+    videoSegments:           VideoSegments;
+    logos:                   Logos;
+    status:                  string;
+    audioText:               string;
+    videoPromptText:         string;
+}
+
+export interface Logos {
+    logo: null;
+}
+
+export interface VideoSegments {
+    segments: Segment[];
+}
+
+export interface Segment {
+    script:  string;
+    visuals: string;
 }
 
 export const postInformationUrl: PostUrlRequest = {

@@ -26,14 +26,18 @@ defineProps<Props>();
 
 <style scoped>
 .video-container {
+  -webkit-box-shadow: var(--skeleton-shadow);
+  -moz-box-shadow: var(--skeleton-shadow);
+  box-shadow: var(--skeleton-shadow);
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  border-radius: 12px;
 }
 
 .video-player {
   width: 100%;
-  height: auto;
+  height: 100%;
   border-radius: 12px;
   background-color: #000;
 }
