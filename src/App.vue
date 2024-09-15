@@ -31,13 +31,13 @@
         </Button>
       </div>
 
-      <div class="d-flex w-100 mt-4 justify-content-center">
+      <div v-if="isLoading" class="d-flex w-100 mt-4 justify-content-center">
         <Skeleton />
       </div>
-      <div class="d-flex w-100 mt-4 justify-content-center">
+      <div v-else class="d-flex w-100 mt-4 justify-content-center">
         <VideoPlayer 
-          src="https://files.vidstack.io/sprite-fight/720p.mp4"
-          poster="https://files.vidstack.io/sprite-fight/poster.webp"
+          :src="videoUrl"
+          poster="./assets/logo.webp"
         />
       </div>
 
@@ -56,14 +56,17 @@ import Button from './components/atoms/Button.vue';
 import Skeleton from './components/atoms/Skeleton.vue';
 import MarkdownContent from './components/MarkdownContent.vue';
 import VideoPlayer from './components/VideoPlayer.vue';
+import { VideoStatusResponse } from './mocks/getVideoStatus.mock';
+import { delay } from './utils/utils';
 
 const baseApiUrl = 'https://limitless-caverns-66680-20d525e8d29f.herokuapp.com/api/v1';
 const isDarkMode = ref(false);
 const url = ref('');
 const isLoading = ref(false);
-const markdownContent = ref(
-  `## Markdown Basic Syntax I just love **bold text**.`
-);
+const markdownContent = ref("");
+const videoId = ref("");
+const videoUrl = ref("https://hackaton-square.s3.amazonaws.com/video.mp4?AWSAccessKeyId=AKIAWOAVSILM3KXDPB37&Signature=TMDy4uVijeUcJOW6kgoeX9AL74U%3D&Expires=1726477667");
+const videoResponse = ref<VideoStatusResponse>();
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
@@ -84,6 +87,29 @@ onMounted(() => {
 
 const theme = computed(() => (isDarkMode.value ? 'dark' : 'light'));
 
+
+const handleLaunchRetry = async () => {
+  let retry = 0
+  const maxAttempts = 10000000000
+
+  const completedStatus = ["COMPLETED"]
+
+  while (
+    retry < maxAttempts
+    && !completedStatus.includes(videoResponse.value?.status ?? "")
+  ) {
+    const getVideoResponse = await fetch(`${baseApiUrl}/site/${videoId.value}`);
+    videoResponse.value = await getVideoResponse.json();
+    videoUrl.value = videoResponse.value?.video_url ?? ""
+    retry++
+
+    if (retry < maxAttempts && !completedStatus.includes(videoResponse.value?.status ?? "")) {
+      await delay(2000)
+    }
+  }
+
+}
+
 const submitUrl = async () => {
   isLoading.value = true;
   try {
@@ -95,9 +121,12 @@ const submitUrl = async () => {
       body: JSON.stringify({ url: url.value }),
     };
 
-    const response = await fetch(`${baseApiUrl}/site`, request);
-    const data = await response.json();
-    console.log(data);
+    const postResponse = await fetch(`${baseApiUrl}/site`, request);
+    const data = await postResponse.json();
+    markdownContent.value = data.content;
+    videoId.value = data.sc_id;
+
+    await handleLaunchRetry()
 
   } catch (error) {
     console.error(error);

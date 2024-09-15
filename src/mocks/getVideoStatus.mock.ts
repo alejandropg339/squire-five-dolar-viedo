@@ -1,6 +1,6 @@
 //https://limitless-caverns-66680-20d525e8d29f.herokuapp.com/api/vi/site/$id
 
-interface VideoStatusResponse {
+export interface VideoStatusResponse {
     sc_id: string;
     status: "SEARCHING" | "PROCESSING" | "READY" | "ERROR";
     content: string;
