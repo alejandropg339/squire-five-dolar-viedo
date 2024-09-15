@@ -11,9 +11,11 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  -webkit-box-shadow: 0px 0px 22px 19px rgba(245, 231, 142, 1);
-  -moz-box-shadow: 0px 0px 22px 19px rgba(245, 231, 142, 1);
-  box-shadow: 0px 0px 22px 19px rgba(245, 231, 142, 1);
+  -webkit-box-shadow: var(--skeleton-shadow);
+  -moz-box-shadow: var(--skeleton-shadow);
+  box-shadow: var(--skeleton-shadow);
+  border-radius: 12px;
+
   &__content {
     width: 100%;
     height: auto;

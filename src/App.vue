@@ -32,7 +32,7 @@
         </Button>
       </div>
 
-      <div v-if="isLoading" class="d-flex w-100 mt-4 justify-content-center">
+      <div v-if="isLoading" class="d-flex w-100 mt-5 justify-content-center">
         <Skeleton />
       </div>
       <div v-else class="d-flex w-100 mt-5 justify-content-center">
