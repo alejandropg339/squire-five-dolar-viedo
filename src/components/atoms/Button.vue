@@ -1,6 +1,7 @@
 <template>
     <button 
         :class="`fv-button fv-button--${type} fv-button--${size} d-flex align-items-center justify-content-center`"
+        :disabled="disabled"
         @click="emit('click')"
     >
         <slot name=start></slot>
@@ -14,7 +15,8 @@
 
 interface Props {
   type?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg' | 'icon' | 'auto';  
+  size?: 'sm' | 'md' | 'lg' | 'icon' | 'auto';
+  disabled?: boolean;  
   label?: string;
 }
 

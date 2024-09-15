@@ -37,7 +37,7 @@
       <div v-else class="d-flex w-100 mt-4 justify-content-center">
         <VideoPlayer 
           :src="videoUrl"
-          poster="./assets/logo.webp"
+          poster="https://hackaton-square.s3.amazonaws.com/logo.webp?AWSAccessKeyId=AKIAWOAVSILM3KXDPB37&Signature=2WptuYsK1i3cd%2F5XLz2spCky8Ng%3D&Expires=1726512465"
         />
       </div>
 
@@ -146,7 +146,7 @@ const submitUrl = async () => {
   --fv-input-bg: #ffffff;
 
   // buttons
-  --fv-button-hover: #383838;
+  --fv-button-hover: #eaeaea;
   --fv-btn-primary-bg: #3a3d47;
   --fv-btn-primary-color: #ffffff;
 

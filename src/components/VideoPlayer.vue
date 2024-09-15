@@ -6,6 +6,7 @@
       class="video-player"
       :poster="poster"
       preload="metadata"
+      autoplay
     >
       Your browser does not support the video tag.
     </video>
